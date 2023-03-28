@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Viewer</title>
+</head>
+<body>
+    <?php
+
+    echo 'hi';
+
+    ?>
+</body>
+</html>
