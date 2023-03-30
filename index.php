@@ -14,7 +14,7 @@
 
 /* --- SETTINGS/CONFIGURATION --- */
 
-$path = '../'; // Path to be viewed. It's important that you include the '/' at the end.
+$path = './'; // Path to be viewed. It's important that you include the '/' at the end.
 $recursive = true; // If true, child directories will be viewable as well.
 $ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
 $cssPath = 'index.css'; // Path to the css file.
@@ -28,7 +28,7 @@ $displayModifiedTime_Format = 'D, d M Y H:i:s'; // Format of which 'displayModif
 $displayDifferentFileIcons = true; // If true, different file types will have different icons.
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
-$oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP.
+$oldPHPSupport = false; // If true, some features may be removed or limited to support older versions of PHP.
 
 // Please remove the following 4 lines if you are using this in production.
 ini_set('display_errors', 1);
@@ -136,9 +136,9 @@ clearstatcache();
                     }
                     if ($recursive) {
                         if ($currentPreviewFolder) {
-                            echo ' | <a href="./?f=' . $currentPreviewFolder . '/' . $file . '">View Files</a>';
+                            echo '<a class="view-files-link" href="./?f=' . $currentPreviewFolder . '/' . $file . '">View Files</a>';
                         } else {
-                            echo ' | <a href="./?f=' . $file . '">View Files</a>';
+                            echo '<a class="view-files-link" href="./?f=' . $file . '">View Files</a>';
                         }
                     }
                     echo '</td></tr>';

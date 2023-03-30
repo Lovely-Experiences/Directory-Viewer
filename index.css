@@ -64,7 +64,12 @@ a
     color: #2594df;
 }
 
-a:hover 
+a:hover
 {
     color: #2282c2;
+}
+
+.view-files-link
+{
+    float: right;
 }
