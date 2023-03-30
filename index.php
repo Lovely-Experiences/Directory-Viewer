@@ -16,15 +16,16 @@
 
 $path = './'; // Path to be viewed. It's important that you include the '/' at the end.
 $recursive = true; // If true, child directories will be viewable as well.
-$ignoredFiles = ['example']; // File extensions or the names of files that should be excluded.
+$ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
 $cssPath = 'index.css'; // Path to the css file.
 
-$displayLink = true; // If true, the file name will also be a link to the file.
-$displayLink_NewTab = false; // If true, file links will open in a new tab.
-$displaySize = true; // If true, the size of the file is displayed.
-$displayDownloadLink = true; // If true, the download link to a file is provided.
-$displayModifiedTime = true; // If true, the date of which the file was last modified will be displayed.
+$displayLink = true; // If true, the file/folder name will also be a link to the file/folder.
+$displayLink_NewTab = false; // If true, file/folder links will open in a new tab.
+$displaySize = true; // If true, the size of files will be displayed.
+$displayDownloadLink = true; // If true, the download link to each file is provided.
+$displayModifiedTime = true; // If true, the date of which each file was last modified will be displayed.
 $displayModifiedTime_Format = 'D, d M Y H:i:s'; // Format of which 'displayModifiedTime' is to be displayed in.
+$mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
 
 // Please remove the following 4 lines if you are using this in production.
 ini_set('display_errors', 1);
@@ -38,16 +39,44 @@ clearstatcache();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Directory Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo $cssPath ?>">
+
+    <?php
+    if ($mobileMode) {
+        echo '<style>';
+        echo '@media screen and (max-width: 650px) { .file-size-content, .file-last-modified-content { display: none; } }';
+        echo '</style>';
+    }
+    ?>
+
 </head>
 
 <body>
 
     <?php
-    if ($recursive and isset($_GET['folder'])) {
-        $childFolder = htmlspecialchars($_GET['folder']);
-        if ($childFolder)
+    $currentlyNotOnMain = false;
+    $currentPreviewFolder = null;
+    if ($recursive and isset($_GET['f'])) {
+        $childFolder = htmlspecialchars($_GET['f']);
+        $currentPreviewFolder = $childFolder;
+        if (str_contains($childFolder, '..')) {
+            echo '<h1>Path not allowed.</h1>';
+            echo '</body>';
+            exit();
+        }
+        if ($childFolder) {
             $path = $path . str_replace('..', '', $childFolder) . '/';
+            $currentlyNotOnMain = true;
+        }
+        if (!is_dir($path)) {
+            echo '<h1>Invalid directory.</h1>';
+            echo '</body>';
+            exit();
+        }
     }
     ?>
 
@@ -62,54 +91,100 @@ clearstatcache();
 
     <table>
         <tr>
-            <th>File</th>
-
-            <?php
-            if ($displaySize)
-                echo '<th>Size</th>';
-            if ($displayDownloadLink)
-                echo '<th>Download</th>';
-            if ($displayModifiedTime)
-                echo '<th>Modified</th>';
-            ?>
-
+            <th>Folders</th>
         </tr>
 
         <?php
+
+        if ($currentlyNotOnMain) {
+            echo '<tr><td><a href="javascript:history.back()"><span class="material-icons-round">arrow_back_ios</span>Previous</a></td></tr>';
+        }
+
         $files_Folders = [];
         $files_Normal = [];
 
-        if (is_dir($path)) {
-            foreach (scandir($path) as $file) {
-                $filePath = $path . $file;
-                if (is_dir($filePath)) {
-                    $files_Folders[] = $file;
-                } else {
-                    $files_Normal[] = $file;
-                }
+        foreach (scandir($path) as $file) {
+            $filePath = $path . $file;
+            if (is_dir($filePath)) {
+                $files_Folders[] = $file;
+            } else {
+                $files_Normal[] = $file;
             }
         }
 
+        $alreadyCreatedFileHeaders = false;
+        $noVisibleFolders = true;
         $files = array_merge($files_Folders, $files_Normal);
         foreach ($files as $file) {
             $filePath = $path . $file;
             if (is_dir($filePath)) {
                 if (!in_array($file, $ignoredFiles)) {
-                    echo '<tr><td>[folder] ' . $file . '</td></tr>';
+                    $noVisibleFolders = false;
+                    echo '<tr><td><span class="material-icons-round">folder</span> ';
+                    if ($displayLink) {
+                        echo '<a href="' . $path . $file . '" ';
+                        if ($displayLink_NewTab) {
+                            echo 'target="_blank"';
+                        }
+                        echo ">" . $file . "</a>";
+                    } else {
+                        echo $file;
+                    }
+                    if ($recursive) {
+                        if ($currentPreviewFolder) {
+                            echo ' | <a href="./?f=' . $currentPreviewFolder . '/' . $file . '">View Files</a>';
+                        } else {
+                            echo ' | <a href="./?f=' . $file . '">View Files</a>';
+                        }
+                    }
+                    echo '</td></tr>';
                 }
             } else {
+                if (!$alreadyCreatedFileHeaders) {
+                    if ($noVisibleFolders) {
+                        echo '<tr><td><span class="material-icons-round">close</span> No Folders</td></tr>';
+                    }
+                    echo '<tr>';
+                    echo '<th>Files</th>';
+                    if ($displaySize)
+                        echo '<th class="file-size-content">Size</th>';
+                    if ($displayDownloadLink)
+                        echo '<th>Download</th>';
+                    if ($displayModifiedTime)
+                        echo '<th class="file-last-modified-content">Modified</th>';
+                    echo '</tr>';
+                    $alreadyCreatedFileHeaders = true;
+                }
                 $fileExpanded = explode('.', $file);
                 $fileExtension = end($fileExpanded);
                 $fileName = reset($fileExpanded);
                 if (!in_array($fileExtension, $ignoredFiles) and !in_array($fileName, $ignoredFiles)) {
                     echo '<tr>';
-                    echo '<td>[file] ' . $file . '</td>';
+                    echo '<td><span class="material-icons-round">description</span> ';
+                    if ($displayLink) {
+                        echo '<a href="' . $path . $file . '" ';
+                        if ($displayLink_NewTab) {
+                            echo 'target="_blank"';
+                        }
+                        echo ">" . $file . "</a>";
+                    } else {
+                        echo $file;
+                    }
+                    echo '</td>';
                     if ($displaySize)
-                        echo '<td>' . filesize($filePath) . ' bytes</td>';
+                        try {
+                            echo '<td class="file-size-content">' . filesize($filePath) . ' bytes</td>';
+                        } catch (Exception $error) {
+                            echo '<td class="file-size-content">' . 'Failed to fetch.' . '</td>';
+                        }
                     if ($displayDownloadLink)
                         echo '<td><a href="' . $filePath . '" download>Download</a></td>';
                     if ($displayModifiedTime)
-                        echo '<th>' . date($displayModifiedTime_Format, filemtime($filePath)) . '</th>';
+                        try {
+                            echo '<td class="file-last-modified-content">' . date($displayModifiedTime_Format, filemtime($filePath)) . '</td>';
+                        } catch (Exception $error) {
+                            echo '<td class="file-last-modified-content">' . 'Failed to fetch.' . '</td>';
+                        }
                     echo '</tr>';
                 }
             }
