@@ -14,7 +14,8 @@
 
 /* --- SETTINGS/CONFIGURATION --- */
 
-$path = '../../'; // Path to be viewed. It's important that you include the '/' at the end.
+$path = './'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
+$serverPath = '/workspaces/Directory-Viewer/'; // Backend path from where files are on the server. In must cases you can leave this blank.
 $recursive = true; // If true, child directories will be viewable as well. This will add clickable a view icon next to each folder icon.
 $ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
 $cssPath = 'index.css'; // Path to the css file.
@@ -36,6 +37,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 clearstatcache();
+
+if ($serverPath !== '')
+    chdir($serverPath);
 
 ?>
 
@@ -225,9 +229,7 @@ clearstatcache();
         <button id="exit-code-viewer">
         Exit Code Viewer
         </button>
-        <div id="code-viewer" class="hljs">
-
-        </div>
+        <div id="code-viewer" class="hljs"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
@@ -256,13 +258,9 @@ clearstatcache();
                         codeViewer.innerHTML = "Unable to view.";
                         return;
                     }
-                    const result = hljs.highlight(code, { language: lang, ignoreIllegals: true });
+                    codeViewer.innerText = code;
+                    hljs.highlightElement(codeViewer);
                     codeViewerBackground.style.display = "block";
-                    if (result.value) {
-                        codeViewer.innerHTML = result.value;
-                    } else {
-                        codeViewer.innerHTML = "Unable to view.";
-                    }
                 }
 
                 codeViewerExit.onclick = function () {
