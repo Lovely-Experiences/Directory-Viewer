@@ -10,6 +10,8 @@ Download the latest [release](https://github.com/Lovely-Experiences/Directory-Vi
 
 You can edit the configuration in the `index.php` file.
 
+Note that downloading directly from the main branch may lead to undesired results.
+
 ---
 
 Have any questions? [Create an issue.](https://github.com/Lovely-Experiences/Directory-Viewer/issues)
