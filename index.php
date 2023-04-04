@@ -30,9 +30,8 @@ $displayDifferentFileIcons = true; // If true, different file types will have di
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
 $displayREADME = true; // If true, if a 'README.md', 'README.markdown', or 'README' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
-$githubUrl = 'https://github.com/jacobhumston-school/htdocs'; // GitHub repository URL, if provided, it will be displayed under the header.
+$githubUrl = 'https://github.com/jacobhumston-school/htdocs/tree/main'; // GitHub repository URL, if provided, it will be displayed under the header. Make sure to include the tree/branch portion of the link.
 $githubLinks = true; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
-$githubBranch = 'main'; // Branch used in 'githubLinks'.
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
 $oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
@@ -107,6 +106,16 @@ if ($serverPath !== '')
         </b>
     </p>
 
+    <?php
+    if ($githubUrl) {
+        echo '<p>'; 
+        echo '<img id="github-icon" src="https://raw.githubusercontent.com/Lovely-Experiences/Directory-Viewer/main/icons/github.svg" alt="GitHub Icon">';
+        echo '<b> GitHub: </b>';
+        echo '<a href="' . $githubUrl . '" target="_blank">' . $githubUrl . '</a>';
+        echo '</p>';
+    }
+    ?>
+
     <table id="main-table">
         <tr>
             <th>Folders</th>
@@ -140,6 +149,10 @@ if ($serverPath !== '')
                 if (!in_array($file, $ignoredFiles)) {
                     $noVisibleFolders = false;
                     echo '<tr><td>';
+                    if ($githubLinks) {
+                        $neededPath = str_replace('../', '', $path);
+                        echo '<a class="github-view" target="_blank" href="' . $githubUrl . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
+                    }
                     if ($recursive) {
                         if ($currentPreviewFolder) {
                             echo '<a href="./?f=' . $currentPreviewFolder . '/' . $file . '"><span class="material-icons-round">visibility</span></a>';
@@ -199,6 +212,10 @@ if ($serverPath !== '')
                             $fileIcon = 'text_fields';
                     }
                     echo '<tr><td>';
+                    if ($githubLinks) {
+                        $neededPath = str_replace('../', '', $path);
+                        echo '<a class="github-view" target="_blank" href="' . $githubUrl . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
+                    }
                     if ($displayFileView) {
                         echo '<a class="file-view" data-url="' . $path . $file . '" data-type="' . $fileExtension . '"><span class="material-icons-round">visibility</span></a>';
                     }
@@ -334,7 +351,7 @@ if ($serverPath !== '')
                         });
                     }
                 }
-
+                
             }
 
             if (displayREADME === '1') {
@@ -350,6 +367,22 @@ if ($serverPath !== '')
                 });
 
             }
+
+            {
+                const elements = document.getElementsByClassName('github-view');
+                for (let i = 0; i < elements.length; i++) {
+                    const element = elements[i];
+                    const url = element.href;
+                    fetch(url, {mode: 'cors', headers: {'Access-Control-Allow-Origin': 'https://github.com'}}).then(async function (result) {
+                        if (result.status !== 200) {
+                            element.classList.add('github-view-bad');
+                        }
+                    }).catch(function () {
+                        // element.classList.add('github-view-bad');
+                        // If it couldn't be fetched, then we will just assume all links are fine.
+                    });
+                }
+            } 
 
         }
     </script>
