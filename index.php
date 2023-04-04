@@ -368,7 +368,7 @@ if ($serverPath !== '')
 
             }
 
-            {
+            if (location.protocol === 'https:') {
                 const elements = document.getElementsByClassName('github-view');
                 for (let i = 0; i < elements.length; i++) {
                     const element = elements[i];
@@ -379,7 +379,7 @@ if ($serverPath !== '')
                         }
                     }).catch(function () {
                         // element.classList.add('github-view-bad');
-                        // If it couldn't be fetched, then we will just assume all links are fine.
+                        // If it couldn't be fetched, then we will just assume the link is fine due to cors. :(
                     });
                 }
             } 
