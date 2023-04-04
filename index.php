@@ -15,7 +15,7 @@
 /* --- SETTINGS/CONFIGURATION --- */
 
 $path = './'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
-$serverPath = '/workspaces/Directory-Viewer/'; // Backend path from where files are on the server. In must cases you can leave this blank.
+$serverPath = ''; // Backend path from where files are on the server. In must cases you can leave this blank.
 $recursive = true; // If true, child directories will be viewable as well. This will add clickable a view icon next to each folder icon.
 $ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
 $cssPath = 'index.css'; // Path to the css file.
@@ -28,9 +28,10 @@ $displayModifiedTime = true; // If true, the date of which each file was last mo
 $displayModifiedTime_Format = 'D, d M Y H:i:s'; // Format of which 'displayModifiedTime' is to be displayed in.
 $displayDifferentFileIcons = true; // If true, different file types will have different icons.
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
+$displayREADME = true; // If true, if a 'README.md' or 'README.markdown' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
-$oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
+$oldPHPSupport = false; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
 
 // Please remove the following 4 lines if you are using this in production.
 ini_set('display_errors', 1);
@@ -171,6 +172,8 @@ if ($serverPath !== '')
                 $fileExpanded = explode('.', $file);
                 $fileExtension = end($fileExpanded);
                 $fileName = reset($fileExpanded);
+                if (substr($fileExtension, 0, strlen($fileName)) === $fileName or substr($fileExtension, 0, strlen($fileName)) === '.' . $fileName)
+                    $fileExtension = 'txt';
                 if (!in_array($fileExtension, $ignoredFiles) and !in_array($fileName, $ignoredFiles)) {
                     $fileIcon = 'description';
                     if ($displayDifferentFileIcons) {
@@ -227,9 +230,9 @@ if ($serverPath !== '')
     </table>
     <div id="code-viewer-background">
         <button id="exit-code-viewer">
-        Exit Code Viewer
+            Exit Code Viewer
         </button>
-        <div id="code-viewer" class="hljs"></div>
+        <pre id="code-viewer" class="hljs"></pre>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
@@ -258,9 +261,38 @@ if ($serverPath !== '')
                         codeViewer.innerHTML = "Unable to view.";
                         return;
                     }
-                    codeViewer.innerText = code;
+
+                    codeViewer.classList.remove(...codeViewer.classList);
+                    codeViewer.classList.add('hljs');
+                    codeViewer.classList.add(`language-${lang}`);
+                    codeViewer.textContent = code;
                     hljs.highlightElement(codeViewer);
                     codeViewerBackground.style.display = "block";
+
+                    const lines = codeViewer.innerHTML.split(/\n/g);
+                    console.log(lines);
+                    codeViewer.innerHTML = '';
+
+                    function createSpaces(string) {
+                        let spaces = `${lines.length}`.length;
+                        let newString = `${string}`;
+                        spaces = spaces - newString.length;
+                        for (let i = 0; i < spaces; i++) {
+                            newString = newString + ' ';
+                        }
+                        return newString;
+                    }
+
+                    let newInnerHTML = '';
+                    lines.forEach(function (value, index) {
+                        index = index + 1;
+                        if (newInnerHTML === '') {
+                            newInnerHTML = `<span class="hljs-comment">${createSpaces(index)}</span>  ${value}`;
+                        } else {
+                            newInnerHTML = `${newInnerHTML}<br><span class="hljs-comment">${createSpaces(index)}</span>  ${value}`;
+                        }
+                    });
+                    codeViewer.innerHTML = newInnerHTML;
                 }
 
                 codeViewerExit.onclick = function () {
@@ -270,14 +302,16 @@ if ($serverPath !== '')
                 const elements = document.getElementsByClassName('file-view');
                 for (let i = 0; i < elements.length; i++) {
                     const element = elements[i];
-                    element.onclick = function() {
-                        const url = element.dataset.url;
-                        const type = element.dataset.type;
+                    const url = element.dataset.url;
+                    let type = element.dataset.type;
+                    if (type === 'php') type = 'html';
+                    if (hljs.getLanguage(type) === undefined) element.classList.add('file-view-bad');
+                    element.onclick = function () {
                         update('Loading...', 'txt');
-                        fetch(url).then(async function(result) {
+                        fetch(url).then(async function (result) {
                             const text = await result.text();
                             update(text, type);
-                        }).catch(function(err) {
+                        }).catch(function (err) {
                             update(`Failed to load. ${err}`, 'txt');
                         });
                     }
