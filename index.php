@@ -28,7 +28,7 @@ $displayModifiedTime = true; // If true, the date of which each file was last mo
 $displayModifiedTime_Format = 'D, d M Y H:i:s'; // Format of which 'displayModifiedTime' is to be displayed in.
 $displayDifferentFileIcons = true; // If true, different file types will have different icons.
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
-$displayREADME = true; // If true, if a 'README.md' or 'README.markdown' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
+$displayREADME = true; // If true, if a 'README.md', 'README.markdown', or 'README' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
 $oldPHPSupport = false; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
@@ -102,7 +102,7 @@ if ($serverPath !== '')
         </b>
     </p>
 
-    <table>
+    <table id="main-table">
         <tr>
             <th>Folders</th>
         </tr>
@@ -123,6 +123,8 @@ if ($serverPath !== '')
                 $files_Normal[] = $file;
             }
         }
+
+        $READMEPath = '';
 
         $alreadyCreatedFileHeaders = false;
         $noVisibleFolders = true;
@@ -174,6 +176,8 @@ if ($serverPath !== '')
                 $fileName = reset($fileExpanded);
                 if (substr($fileExtension, 0, strlen($fileName)) === $fileName or substr($fileExtension, 0, strlen($fileName)) === '.' . $fileName)
                     $fileExtension = 'txt';
+                if (strtolower($file) === 'readme.md' or strtolower($file) === 'readme.markdown' or strtolower($file) === 'readme')
+                    $READMEPath = $path . $file;
                 if (!in_array($fileExtension, $ignoredFiles) and !in_array($fileName, $ignoredFiles)) {
                     $fileIcon = 'description';
                     if ($displayDifferentFileIcons) {
@@ -228,6 +232,19 @@ if ($serverPath !== '')
         ?>
 
     </table>
+
+    <?php
+    if ($READMEPath === '')
+        $displayREADME = false;
+
+    if ($displayREADME) {
+        echo '<table id="readme-table">';
+        echo '<tr><th><span class="material-icons-round">menu_book</span> README</th></tr>';
+        echo '<tr><td><span id="readme-content">Loading...</span></td></tr>';
+        echo '</table>';
+    }
+    ?>
+
     <div id="code-viewer-background">
         <button id="exit-code-viewer">
             Exit Code Viewer
@@ -248,8 +265,14 @@ if ($serverPath !== '')
 
         window.onload = function () {
 
-            const fileViewerEnabled = new Boolean(<?php echo $displayFileView ?>);
-            if (fileViewerEnabled) {
+            const mainTable = document.getElementById('main-table');
+            const READMETable = document.getElementById('readme-table');
+
+            const fileViewerEnabled = '<?php echo $displayFileView ?>';
+            const displayREADME = '<?php echo $displayREADME ?>';
+            const READMEUrl = '<?php echo $READMEPath ?>';
+
+            if (fileViewerEnabled === '1') {
 
                 const codeViewerBackground = document.getElementById('code-viewer-background');
                 const codeViewer = document.getElementById('code-viewer');
@@ -270,7 +293,6 @@ if ($serverPath !== '')
                     codeViewerBackground.style.display = "block";
 
                     const lines = codeViewer.innerHTML.split(/\n/g);
-                    console.log(lines);
                     codeViewer.innerHTML = '';
 
                     function createSpaces(string) {
@@ -316,6 +338,20 @@ if ($serverPath !== '')
                         });
                     }
                 }
+
+            }
+
+            if (displayREADME === '1') {
+
+                const READMEContent = document.getElementById('readme-content');
+
+                fetch(READMEUrl).then(async function (result) {
+                    const text = await result.text();
+                    const converter = new showdown.Converter();
+                    READMEContent.innerHTML = converter.makeHtml(text);
+                }).catch(function (err) {
+                    READMEContent.innerHTML = 'Failed to load...';
+                });
 
             }
 

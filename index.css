@@ -136,6 +136,11 @@ a:hover
     color: #5bb0ff;
 }
 
+#readme-content img
+{
+    max-width: 90%;
+}
+
 /* ----------------------------------- */
 
 /*
