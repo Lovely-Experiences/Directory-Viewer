@@ -3,7 +3,7 @@
 
 <!-- 
 
-    Directory Viewer
+    Directory Viewer - v1.1.0
     https://github.com/Lovely-Experiences/Directory-Viewer
 
     Licensed under the Apache License 2.0
@@ -14,7 +14,7 @@
 
 /* --- SETTINGS/CONFIGURATION --- */
 
-$path = './'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
+$path = '../../'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
 $serverPath = ''; // Backend path from where files are on the server. In must cases you can leave this blank.
 $recursive = true; // If true, child directories will be viewable as well. This will add clickable a view icon next to each folder icon.
 $ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
@@ -30,8 +30,12 @@ $displayDifferentFileIcons = true; // If true, different file types will have di
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
 $displayREADME = true; // If true, if a 'README.md', 'README.markdown', or 'README' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
+$githubUrl = 'https://github.com/jacobhumston-school/htdocs'; // GitHub repository URL, if provided, it will be displayed under the header.
+$githubLinks = true; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
+$githubBranch = 'main'; // Branch used in 'githubLinks'.
+
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
-$oldPHPSupport = false; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
+$oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
 
 // Please remove the following 4 lines if you are using this in production.
 ini_set('display_errors', 1);
@@ -39,6 +43,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 clearstatcache();
 
+// Setting the server path!
 if ($serverPath !== '')
     chdir($serverPath);
 
@@ -254,15 +259,6 @@ if ($serverPath !== '')
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
     <script>
-        /*
-    
-            Directory Viewer
-            https://github.com/Lovely-Experiences/Directory-Viewer
-    
-            Licensed under the Apache License 2.0
-    
-        */
-
         window.onload = function () {
 
             const mainTable = document.getElementById('main-table');
