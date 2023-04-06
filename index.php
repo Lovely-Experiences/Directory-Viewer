@@ -14,7 +14,7 @@
 
 /* --- SETTINGS/CONFIGURATION --- */
 
-$path = '../../'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
+$path = './'; // Path to be viewed. It's important that you include the '/' at the end. This is used in URLs.
 $serverPath = ''; // Backend path from where files are on the server. In must cases you can leave this blank.
 $recursive = true; // If true, child directories will be viewable as well. This will add clickable a view icon next to each folder icon.
 $ignoredFiles = ['.', '..']; // File extensions or the names of files/folders that should be excluded.
@@ -30,8 +30,8 @@ $displayDifferentFileIcons = true; // If true, different file types will have di
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
 $displayREADME = true; // If true, if a 'README.md', 'README.markdown', or 'README' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
-$githubUrl = 'https://github.com/jacobhumston-school/htdocs/tree/main'; // GitHub repository URL, if provided, it will be displayed under the header. Make sure to include the tree/branch portion of the link.
-$githubLinks = true; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
+$githubUrl = ''; // GitHub repository URL, if provided, it will be displayed under the header. Make sure to include the tree/branch portion of the link.
+$githubLinks = false; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
 $oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
