@@ -30,8 +30,8 @@ $displayDifferentFileIcons = true; // If true, different file types will have di
 $displayFileView = true; // If true, a clickable icon to display the items content in a code-like view will be available for each file.
 $displayREADME = true; // If true, if a 'README.md', 'README.markdown', or 'README' is found, it will be displayed at the bottom of the page. (Not case sensitive.)
 
-$githubUrl = ''; // GitHub repository URL, if provided, it will be displayed under the header. Make sure to include the tree/branch portion of the link.
-$githubLinks = false; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
+$githubUrl = 'https://github.com/Lovely-Experiences/Directory-Viewer/tree/main'; // GitHub repository URL, if provided, it will be displayed under the header. Make sure to include the tree/branch portion of the link. Example: https://github.com/Lovely-Experiences/Directory-Viewer/tree/main/
+$githubLinks = true; // If true, folders and files will include their respective GitHub links. Requires 'githubUrl'.
 
 $mobileMode = true; // If true, small mobile devices will only include the files/folders and download (if enabled) sections.
 $oldPHPSupport = true; // If true, some features may be removed or limited to support older versions of PHP. This should be considered experimental.
@@ -108,7 +108,7 @@ if ($serverPath !== '')
 
     <?php
     if ($githubUrl) {
-        echo '<p>'; 
+        echo '<p>';
         echo '<img id="github-icon" src="https://raw.githubusercontent.com/Lovely-Experiences/Directory-Viewer/main/icons/github.svg" alt="GitHub Icon">';
         echo '<b> GitHub: </b>';
         echo '<a href="' . $githubUrl . '" target="_blank">' . $githubUrl . '</a>';
@@ -149,10 +149,10 @@ if ($serverPath !== '')
                 if (!in_array($file, $ignoredFiles)) {
                     $noVisibleFolders = false;
                     echo '<tr><td>';
-                    if ($githubLinks) {
-                        $neededPath = str_replace('../', '', $path);
-                        echo '<a class="github-view" target="_blank" href="' . $githubUrl . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
-                    }
+                    //if ($githubLinks) {
+                    //    $neededPath = str_replace('../', '', $path);
+                    //    echo '<a class="github-view" target="_blank" href="' . str_replace('github.com', 'raw.githubusercontent.com', str_replace('tree', 'blob', $githubUrl)) . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
+                    //}
                     if ($recursive) {
                         if ($currentPreviewFolder) {
                             echo '<a href="./?f=' . $currentPreviewFolder . '/' . $file . '"><span class="material-icons-round">visibility</span></a>';
@@ -214,7 +214,7 @@ if ($serverPath !== '')
                     echo '<tr><td>';
                     if ($githubLinks) {
                         $neededPath = str_replace('../', '', $path);
-                        echo '<a class="github-view" target="_blank" href="' . $githubUrl . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
+                        echo '<a class="github-view" target="_blank" href="' . str_replace('github.com', 'raw.githubusercontent.com', str_replace('tree/', '', $githubUrl)) . '/' . $neededPath . $file . '"><span class="material-icons-round">launch</span></a>';
                     }
                     if ($displayFileView) {
                         echo '<a class="file-view" data-url="' . $path . $file . '" data-type="' . $fileExtension . '"><span class="material-icons-round">visibility</span></a>';
@@ -373,13 +373,13 @@ if ($serverPath !== '')
                 for (let i = 0; i < elements.length; i++) {
                     const element = elements[i];
                     const url = element.href;
-                    fetch(url, {mode: 'cors', headers: {'Access-Control-Allow-Origin': 'https://github.com'}}).then(async function (result) {
+                    fetch(url).then(async function (result) {
                         if (result.status !== 200) {
                             element.classList.add('github-view-bad');
                         }
-                    }).catch(function () {
-                        // element.classList.add('github-view-bad');
-                        // If it couldn't be fetched, then we will just assume the link is fine due to cors. :(
+                    }).catch(function (err) {
+                        console.warn(err);
+                        element.classList.add('github-view-bad');
                     });
                 }
             } 
